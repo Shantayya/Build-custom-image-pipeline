@@ -19,6 +19,11 @@ pipeline{
                 command:
                 - cat
                 tty: true
+              - name: kubectl-helm
+                image: shantayya/kubectl-helm-cli:latest
+                command:
+                - cat
+                tty: true
                 volumeMounts:
                 - name: docker-sock
                   mountPath: /var/run/docker.sock  
@@ -55,12 +60,12 @@ pipeline{
             steps{
                 container('git'){
                     git branch: 'master',
-                    url: 'https://github.com/Shantayya/spring-petclinic.git'
+                    url: 'https://github.com/Shantayya/Build-custom-image-pipeline.git'
                 }       
             }
         }
         stage('Build Docker Image'){
-                when { expression { true }}
+                when { expression { false }}
                 steps{
                     container('docker'){
                         sh "docker build -t $IMAGE_NAME:$IMAGE_TAG ."
@@ -76,7 +81,7 @@ pipeline{
                     }
             }
             stage('Deploy Spring-petclinic to K8s Cluster'){
-                when { expression { false}}
+                when { expression { true}}
                 steps{
                     container('kubectl'){
                         withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'kubeconfig', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
